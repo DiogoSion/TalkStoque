@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Employee } from '../types/employee';
 import EmployeeForm from '../components/EmployeeForm';
+import ModalWrapper from '../components/ModalWrapper';
+import ConfirmModal from '../components/ConfirmModal';
 
 const sampleEmployees: Employee[] = [/* seus funcionários iniciais */];
 
@@ -61,7 +63,6 @@ export default function Employers() {
         </button>
       </div>
 
-      {/* Employees Table */}
       <table className="min-w-full divide-y divide-gray-200 bg-white shadow-md rounded-lg overflow-hidden">
         <thead className="bg-gray-50">
           <tr>
@@ -103,47 +104,27 @@ export default function Employers() {
         </tbody>
       </table>
 
-      {/* Form Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              {editingEmployee ? 'Edit Employee' : 'Add New Employee'}
-            </h3>
-            <EmployeeForm
-              initialData={editingEmployee || {}}
-              onSubmit={handleSubmit}
-              onCancel={handleCancel}
-              isEditing={!!editingEmployee}
-            />
-          </div>
-        </div>
+        <ModalWrapper
+          title={editingEmployee ? 'Edit Employee' : 'Add New Employee'}
+          onClose={handleCancel}
+        >
+          <EmployeeForm
+            initialData={editingEmployee || {}}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            isEditing={!!editingEmployee}
+          />
+        </ModalWrapper>
       )}
 
-      {/* Confirm Delete Modal */}
       {employeeToDelete && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Confirm Deletion</h3>
-            <p className="mb-4 text-gray-700">
-              Are you sure you want to delete <strong>{employeeToDelete.name}</strong>?
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setEmployeeToDelete(null)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          title="Confirm Deletion"
+          message={`Are you sure you want to delete ${employeeToDelete.name}?`}
+          onCancel={() => setEmployeeToDelete(null)}
+          onConfirm={confirmDelete}
+        />
       )}
     </div>
   );

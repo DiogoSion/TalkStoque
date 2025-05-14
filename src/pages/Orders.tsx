@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Order } from '../types/order';
 import OrderForm from '../components/OrderForm';
+import ModalWrapper from '../components/ModalWrapper';
+import ConfirmModal from '../components/ConfirmModal';
 
 const sampleOrders: Order[] = [
   {
@@ -134,45 +136,28 @@ export default function Orders() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              {editingOrder ? 'Edit Order' : 'Add New Order'}
-            </h3>
-            <OrderForm
-              initialData={editingOrder || {}}
-              onSubmit={handleSubmit}
-              onCancel={handleCancel}
-              isEditing={!!editingOrder}
-            />
-          </div>
-        </div>
+        <ModalWrapper
+          title={editingOrder ? 'Edit Order' : 'Add New Order'}
+          onClose={handleCancel}
+        >
+          <OrderForm
+            initialData={editingOrder || {}}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            isEditing={!!editingOrder}
+          />
+        </ModalWrapper>
       )}
 
       {orderToDelete && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Confirm Deletion</h3>
-            <p className="mb-4 text-gray-700">
-              Are you sure you want to delete <strong>{orderToDelete.orderNumber}</strong>?
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setOrderToDelete(null)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          title="Confirm Deletion"
+          message={`Are you sure you want to delete ${orderToDelete.orderNumber}?`}
+          onCancel={() => setOrderToDelete(null)}
+          onConfirm={confirmDelete}
+        />
       )}
+      
     </div>
   );
 }

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import ProductForm from '../components/ProductForm';
 import { Product } from '../types/product';
+import ModalWrapper from '../components/ModalWrapper';
+import ConfirmModal from '../components/ConfirmModal';
 
 const sampleProducts: Product[] = [
   {
@@ -54,6 +56,12 @@ function Inventory() {
       setProductToDelete(null);
     }
   };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    setEditingProduct(null);
+  };
+
 
   return (
     <div className="space-y-6">
@@ -115,14 +123,13 @@ function Inventory() {
           </tbody>
         </table>
       </div>
-
+      
       {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              {editingProduct ? 'Edit Product' : 'Add New Product'}
-            </h3>
-            <ProductForm
+        <ModalWrapper
+          title={editingProduct ? 'Edit Product' : 'Add New Product'}
+          onClose={handleCancel}
+        >
+          <ProductForm
               initialData={editingProduct || {}}
               onCancel={() => {
                 setIsModalOpen(false);
@@ -130,35 +137,16 @@ function Inventory() {
               }}
               onSubmit={handleSaveProduct}
             />
-          </div>
-        </div>
+        </ModalWrapper>
       )}
 
       {productToDelete && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Confirm Deletion
-            </h3>
-            <p className="mb-4 text-gray-700">
-              Are you sure you want to delete <strong>{productToDelete.name}</strong>?
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setProductToDelete(null)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          title="Confirm Deletion"
+          message={`Are you sure you want to delete ${productToDelete.name}?`}
+          onCancel={() => setProductToDelete(null)}
+          onConfirm={confirmDelete}
+        />
       )}
     </div>
   );

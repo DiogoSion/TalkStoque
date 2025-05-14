@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Sale } from '../types/sale';
 import SaleForm from '../components/SaleForm';
+import ModalWrapper from '../components/ModalWrapper';
+import ConfirmModal from '../components/ConfirmModal';
 
 const sampleSales: Sale[] = [
   {
@@ -11,7 +13,7 @@ const sampleSales: Sale[] = [
     products: 'Cola Classic (24), Natural Spring Water (48)',
     amount: 89.76,
     paymentMethod: 'Credit Card',
-    saleDate: '2024-03-15'
+    saleDate: '2024-03-15',
   },
   {
     id: '2',
@@ -20,8 +22,8 @@ const sampleSales: Sale[] = [
     products: 'Energy Drink (36), Sparkling Water (24)',
     amount: 156.84,
     paymentMethod: 'Bank Transfer',
-    saleDate: '2024-03-14'
-  }
+    saleDate: '2024-03-14',
+  },
 ];
 
 export default function Sales() {
@@ -40,12 +42,14 @@ export default function Sales() {
     } else {
       const newSale: Sale = {
         id: Date.now().toString(),
-        invoiceNumber: `INV-2024-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+        invoiceNumber: `INV-2024-${Math.floor(Math.random() * 1000)
+          .toString()
+          .padStart(3, '0')}`,
         customerName: data.customerName || '',
         products: data.products || '',
         amount: data.amount || 0,
         paymentMethod: data.paymentMethod || '',
-        saleDate: data.saleDate || new Date().toISOString().split('T')[0]
+        saleDate: data.saleDate || new Date().toISOString().split('T')[0],
       };
       setSales([...sales, newSale]);
     }
@@ -70,7 +74,10 @@ export default function Sales() {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Sales Management</h2>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setEditingSale(null);
+            setIsModalOpen(true);
+          }}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
         >
           <Plus className="h-5 w-5 mr-2" />
@@ -126,44 +133,26 @@ export default function Sales() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              {editingSale ? 'Edit Sale' : 'Add New Sale'}
-            </h3>
-            <SaleForm
-              initialData={editingSale || {}}
-              onSubmit={handleSubmit}
-              onCancel={handleCancel}
-              isEditing={!!editingSale}
-            />
-          </div>
-        </div>
+        <ModalWrapper
+          title={editingSale ? 'Edit Sale' : 'Add New Sale'}
+          onClose={handleCancel}
+        >
+          <SaleForm
+            initialData={editingSale || {}}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            isEditing={!!editingSale}
+          />
+        </ModalWrapper>
       )}
 
       {saleToDelete && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Confirm Deletion</h3>
-            <p className="mb-4 text-gray-700">
-              Are you sure you want to delete <strong>{saleToDelete.invoiceNumber}</strong>?
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setSaleToDelete(null)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          title="Confirm Deletion"
+          message={`Are you sure you want to delete ${saleToDelete.invoiceNumber}?`}
+          onCancel={() => setSaleToDelete(null)}
+          onConfirm={confirmDelete}
+        />
       )}
     </div>
   );
