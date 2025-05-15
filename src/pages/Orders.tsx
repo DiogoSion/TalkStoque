@@ -4,6 +4,9 @@ import { Order } from '../types/order';
 import OrderForm from '../components/OrderForm';
 import ModalWrapper from '../components/ModalWrapper';
 import ConfirmModal from '../components/ConfirmModal';
+import AddButton from '../components/AddButton';
+import TableWrapper from '../components/TableWrapper';
+import ActionButtons from '../components/ActionButtons';
 
 const sampleOrders: Order[] = [
   {
@@ -71,69 +74,46 @@ export default function Orders() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Orders Management</h2>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-        >
-          <Plus className="h-5 w-5 mr-2" />
-          Add Order
-        </button>
+        <AddButton
+          label="Order"
+          onClick={() => {
+            setEditingOrder(null);
+            setIsModalOpen(true);
+          }}
+        />
       </div>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3">Order #</th>
-              <th className="px-6 py-3">Customer</th>
-              <th className="px-6 py-3">Products</th>
-              <th className="px-6 py-3">Total</th>
-              <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3">Date</th>
-              <th className="px-6 py-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {orders.map((order) => (
-              <tr key={order.id}>
-                <td className="px-6 py-4">{order.orderNumber}</td>
-                <td className="px-6 py-4">{order.customerName}</td>
-                <td className="px-6 py-4">{order.products}</td>
-                <td className="px-6 py-4">${order.totalAmount.toFixed(2)}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-2 inline-flex text-xs font-semibold rounded-full ${
-                    order.status === 'Delivered'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {order.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4">{order.orderDate}</td>
-                <td className="px-6 py-4 text-sm">
-                  <div className="flex space-x-2">
-                    <button
-                      className="text-blue-600 hover:text-blue-900"
-                      onClick={() => {
-                        setEditingOrder(order);
-                        setIsModalOpen(true);
-                      }}
-                    >
-                      <Pencil className="h-5 w-5" />
-                    </button>
-                    <button
-                      className="text-red-600 hover:text-red-900"
-                      onClick={() => setOrderToDelete(order)}
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <TableWrapper columns={["Order #", "Customer", "Products", "Total", "Status", "Date", "Actions"]}>
+        {orders.map((order) => (
+          <tr key={order.id}>
+            <td className="px-6 py-4">{order.orderNumber}</td>
+            <td className="px-6 py-4">{order.customerName}</td>
+            <td className="px-6 py-4">{order.products}</td>
+            <td className="px-6 py-4">${order.totalAmount.toFixed(2)}</td>
+            <td className="px-6 py-4">
+              <span className={`px-2 inline-flex text-xs font-semibold rounded-full ${
+                order.status === 'Delivered'
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-yellow-100 text-yellow-800'
+              }`}>
+                {order.status}
+              </span>
+            </td>
+            <td className="px-6 py-4">{order.orderDate}</td>
+            <td className="px-6 py-4 text-sm">
+              <div className="flex space-x-2">
+                <ActionButtons
+                onEdit={() => {
+                  setEditingOrder(order);
+                  setIsModalOpen(true);
+                }}
+                onDelete={() => setOrderToDelete(order)}
+                />                
+              </div>
+            </td>
+          </tr>
+        ))}
+      </TableWrapper>
 
       {isModalOpen && (
         <ModalWrapper
@@ -157,7 +137,6 @@ export default function Orders() {
           onConfirm={confirmDelete}
         />
       )}
-      
     </div>
   );
 }

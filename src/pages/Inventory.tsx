@@ -4,6 +4,9 @@ import ProductForm from '../components/ProductForm';
 import { Product } from '../types/product';
 import ModalWrapper from '../components/ModalWrapper';
 import ConfirmModal from '../components/ConfirmModal';
+import AddButton from '../components/AddButton';
+import TableWrapper from '../components/TableWrapper';
+import ActionButtons from '../components/ActionButtons';
 
 const sampleProducts: Product[] = [
   {
@@ -62,81 +65,53 @@ function Inventory() {
     setEditingProduct(null);
   };
 
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Inventory Management</h2>
-        <button
+        <AddButton
+          label="Product"
           onClick={() => {
             setEditingProduct(null);
             setIsModalOpen(true);
           }}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-        >
-          <Plus className="h-5 w-5 mr-2" />
-          Add Product
-        </button>
+        />
       </div>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {products.map((product) => (
-              <tr key={product.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.category}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.price.toFixed(2)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {product.stock} {product.unit}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div className="flex space-x-2">
-                    <button
-                      className="text-blue-600 hover:text-blue-900"
-                      onClick={() => {
-                        setEditingProduct(product);
-                        setIsModalOpen(true);
-                      }}
-                    >
-                      <Pencil className="h-5 w-5" />
-                    </button>
-                    <button
-                      className="text-red-600 hover:text-red-900"
-                      onClick={() => setProductToDelete(product)}
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      
+      <TableWrapper columns={["Product", "Category", "Price", "Stock", "Actions"]}>
+        {products.map((product) => (
+          <tr key={product.id}>
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.category}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.price.toFixed(2)}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {product.stock} {product.unit}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <div className="flex space-x-2">
+                <ActionButtons
+                onEdit={() => {
+                  setEditingProduct(product);
+                  setIsModalOpen(true);
+                }}
+                onDelete={() => setProductToDelete(product)}
+              />
+              </div>
+            </td>
+          </tr>
+        ))}
+      </TableWrapper>
+
       {isModalOpen && (
         <ModalWrapper
           title={editingProduct ? 'Edit Product' : 'Add New Product'}
           onClose={handleCancel}
         >
           <ProductForm
-              initialData={editingProduct || {}}
-              onCancel={() => {
-                setIsModalOpen(false);
-                setEditingProduct(null);
-              }}
-              onSubmit={handleSaveProduct}
-            />
+            initialData={editingProduct || {}}
+            onCancel={handleCancel}
+            onSubmit={handleSaveProduct}
+          />
         </ModalWrapper>
       )}
 
