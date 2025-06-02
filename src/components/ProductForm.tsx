@@ -1,16 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product } from '../types/product';
 
 interface ProductFormProps {
   initialData: Partial<Product>;
   onSubmit: (product: Partial<Product>) => void;
   onCancel: () => void;
+  // isEditing?: boolean; // Pode ser útil se você quiser lógica específica
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState<Partial<Product>>(initialData);
 
-  const handleChange = (field: keyof Product, value: string | number) => {
+  useEffect(() => {
+    setFormData(initialData);
+  }, [initialData]);
+
+  const handleChange = (
+    field: keyof Product,
+    value: string | number | null
+  ) => {
     setFormData({ ...formData, [field]: value });
   };
 
@@ -32,6 +40,20 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, onCanc
           onChange={(e) => handleChange('name', e.target.value)}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           required
+        />
+      </div>
+
+      {/* Campo Descrição*/}
+      <div>
+        <label htmlFor="descricao" className="block text-sm font-medium text-gray-700">
+          Description
+        </label>
+        <textarea
+          id="descricao"
+          rows={3}
+          value={formData.descricao || ''}
+          onChange={(e) => handleChange('descricao', e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         />
       </div>
 
@@ -62,8 +84,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, onCanc
           type="number"
           id="price"
           step="0.01"
-          value={formData.price || ''}
-          onChange={(e) => handleChange('price', parseFloat(e.target.value))}
+          value={formData.price === undefined ? '' : formData.price} // Lidar com valor inicial undefined
+          onChange={(e) => handleChange('price', parseFloat(e.target.value) || 0)}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           required
         />
@@ -76,30 +98,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, onCanc
         <input
           type="number"
           id="stock"
-          value={formData.stock || ''}
-          onChange={(e) => handleChange('stock', parseInt(e.target.value))}
+          value={formData.stock === undefined ? '' : formData.stock} // Lidar com valor inicial undefined
+          onChange={(e) => handleChange('stock', parseInt(e.target.value, 10) || 0)}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           required
         />
-      </div>
-
-      <div>
-        <label htmlFor="unit" className="block text-sm font-medium text-gray-700">
-          Unit
-        </label>
-        <select
-          id="unit"
-          value={formData.unit || ''}
-          onChange={(e) => handleChange('unit', e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          required
-        >
-          <option value="">Select a unit</option>
-          <option value="bottles">Bottles</option>
-          <option value="cans">Cans</option>
-          <option value="packs">Packs</option>
-          <option value="cases">Cases</option>
-        </select>
       </div>
 
       <div className="flex justify-end space-x-3 mt-6">

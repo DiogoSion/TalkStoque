@@ -1,16 +1,58 @@
+// src/pages/Login.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { KeyRound } from 'lucide-react';
+import apiClient from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const auth = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement authentication
-    navigate('/admin');
+    setError(null);
+
+    const params = new URLSearchParams();
+    params.append('username', email); // API espera 'username' para o campo de email
+    params.append('password', password);
+
+    try {
+      const response = await apiClient.post(
+        '/token',
+        params,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
+
+      const token = response.data.access_token;
+      if (token) {
+        await auth.login(token); // 👈 Chamar a função login do contexto
+        // A função login no AuthContext já vai disparar o fetchUserInfo
+        navigate('/admin'); // Navegar após o login e fetch de info (se quiser esperar)
+      } else {
+        setError('Token não recebido da API.');
+      }
+    } catch (err: any) {
+      console.error('Erro no login:', err);
+      if (err.response && err.response.data && err.response.data.detail) {
+        if (Array.isArray(err.response.data.detail)) {
+            setError(err.response.data.detail.map((d: any) => d.msg).join(', '));
+        } else if (typeof err.response.data.detail === 'string') {
+             setError(err.response.data.detail);
+        } else {
+            setError('Falha no login. Verifique suas credenciais.');
+        }
+      } else {
+        setError('Falha no login. Verifique suas credenciais ou a conexão com a API.');
+      }
+    }
   };
 
   return (
@@ -29,7 +71,7 @@ function Login() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+                Email address (Username)
               </label>
               <div className="mt-1">
                 <input
@@ -62,6 +104,12 @@ function Login() {
                 />
               </div>
             </div>
+
+            {error && (
+              <div>
+                <p className="text-sm text-red-600 text-center">{error}</p>
+              </div>
+            )}
 
             <div>
               <button
